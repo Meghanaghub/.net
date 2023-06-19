@@ -18,14 +18,15 @@ namespace Gradebook
         }
     }
 
-    public interface IBook{
+    public interface IBook
+    {
         void AddGrade(double grade);
         statistics GetStatistics();
-        string Name {get;}
+        string Name { get; }
         event GradeAddedDelegate GradeAdded;
     }
 
-    public abstract class Book :NamedObject,  IBook
+    public abstract class Book : NamedObject, IBook
     {
         protected Book(string name) : base(name)
         {
@@ -42,20 +43,20 @@ namespace Gradebook
     {
         public DiskBook(string name) : base(name)
         {
-             
+
         }
 
         public override event GradeAddedDelegate GradeAdded;
 
         public override void AddGrade(double grade)
         {
-       
-            using(var writer = File.AppendText($"{Name}.txt"))
+
+            using (var writer = File.AppendText($"{Name}.txt"))
             {
                 writer.WriteLine(grade);
-                if(GradeAdded!= null)
+                if (GradeAdded != null)
                 {
-                    GradeAdded(this , new EventArgs());
+                    GradeAdded(this, new EventArgs());
                 }
                 writer.Dispose();
             }
@@ -64,17 +65,24 @@ namespace Gradebook
         public override statistics GetStatistics()
         {
             var grades = new List<double>();
-            using(var reader = File.OpenText($"{Name}.txt"))
+            using (var reader = File.OpenText($"{Name}.txt"))
             {
-                
-                var num = reader.ReadLine();
-                if(num != null)
+                while (true)
                 {
-                   var grade = double.Parse(num);
-                   grades.Add(grade);
+                    var num = reader.ReadLine();
+                    if (num != null)
+                    {
+                        var grade = double.Parse(num);
+                        grades.Add(grade);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
+
             }
-            Console.WriteLine(grades);
+            Console.WriteLine(grades[1]);
             var result = new statistics(grades);
             return result;
         }
@@ -87,16 +95,16 @@ namespace Gradebook
             Name = name;
             grades = new List<double>();
         }
-    
+
         // Add a valid grade else thow exception
         public override void AddGrade(double grade)
         {
             if (grade > 0 && grade < 100)
             {
                 grades.Add(grade);
-                if(GradeAdded!= null)
+                if (GradeAdded != null)
                 {
-                    GradeAdded(this,new EventArgs());
+                    GradeAdded(this, new EventArgs());
                 }
             }
 
@@ -104,7 +112,7 @@ namespace Gradebook
             {
                 throw new ArgumentException($"Invalid {nameof(grade)}");
             }
-            
+
 
         }
 
@@ -134,14 +142,14 @@ namespace Gradebook
 
         // Method to get statistics on entered grades
         public override statistics GetStatistics()
-        {   
+        {
             var result = new statistics(grades);
             return result;
 
         }
 
         private List<double> grades;
-       
+
         public const string CATEGORY = "Science";
     }
 }
